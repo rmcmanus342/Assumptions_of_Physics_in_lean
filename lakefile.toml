@@ -1,0 +1,18 @@
+name = "Assumptions_of_Physics_in_lean"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["AssumptionsOfPhysicsInLean"]
+
+[leanOptions]
+pp.unicode.fun = true # pretty-prints `fun a ↦ b`
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+maxSynthPendingDepth = 3
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.29.0-rc2"
+
+[[lean_lib]]
+name = "AssumptionsOfPhysicsInLean"
