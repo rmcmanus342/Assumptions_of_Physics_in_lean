@@ -1,7 +1,7 @@
 import AssumptionsOfPhysicsInLean.logical_context.Basic
 import AssumptionsOfPhysicsInLean.logical_context.Order
 import AssumptionsOfPhysicsInLean.logical_context.Equiv
-
+import Mathlib.Data.Fintype.Order
 
 variable {C : LogicalContext}
 open LogicalContext
@@ -45,15 +45,19 @@ theorem Narrower_congr {s₁ s₂ s₁' s₂' : C.Statement} :
 simp_all
 theorem Not_congr {s t : C.Statement} :
   s ≡ t → (¬s) ≡ (¬t) := by
-intro h a ha
-simp_all only [equivalent, Not_spec]
+intro hcongr a ha
+rw [Not_spec a ha, Not_spec a ha, hcongr a ha]
 
 theorem And_congr {s t s' t' : C.Statement} :
   s ≡ s' →
   t ≡ t' →
   s ∧ t ≡ s' ∧ t' := by
   intro h1 h2 a ha
-  simp_all only [equivalent, Connectives.And_spec]
+  rw [And_spec a ha, And_spec a ha]
+  specialize h1 a ha
+  specialize h2 a ha
+  rw [h1, h2]
+
 
 theorem Or_congr {s t s' t' : C.Statement} :
   s ≡ s' →
@@ -62,37 +66,28 @@ theorem Or_congr {s t s' t' : C.Statement} :
   intro h1 h2 a ha
   simp_all only [equivalent, Connectives.Or_spec]
 
-theorem Any_congr {S T : Set C.Statement} :
-  (∀ s ∈ S, ∃ t ∈ T, s ≡ t) →
-  (∀ t ∈ T, ∃ s ∈ S, t ≡ s) →
+theorem Any_congr (S T : Set C.Statement) :
+  (∀ s t, s ≡ t → (s ∈ S ↔ t ∈ T)) →
   Any S ≡ Any T := by
-  intro hST hTS a ha
-  rw [Any_spec _ a ha, Any_spec _ a ha]
-  apply le_antisymm
-  · apply sSup_le
-    intro x hx
-    rw [Set.mem_image a S] at hx
-    obtain ⟨s, hsS, rfl⟩ := hx
-    obtain ⟨t, htT, h_eq⟩ := hST s hsS
-    specialize h_eq a ha
-    rw [h_eq]
-    specialize hST s hsS
-    sorry
-  · apply sSup_le
-    intro x hx
-    rw [Set.mem_image a T ] at hx
-    obtain ⟨t, htT, rfl⟩ := hx
-    obtain ⟨s, hsS, h_eq⟩ := hTS t htT
-    specialize h_eq a ha
-    sorry
+intro h
+have hST : S = T := by
+  apply Set.ext
+  intro s
+  exact h s s equiv_refl
+subst hST
+rfl
 
-theorem All_congr {S T : Set C.Statement} :
-  (∀ s ∈ S, ∃ t ∈ T, s ≡ t) →
-  (∀ t ∈ T, ∃ s ∈ S, t ≡ s) →
+theorem All_congr (S T : Set C.Statement) :
+  (∀ s t, s ≡ t → (s ∈ S ↔ t ∈ T)) →
   All S ≡ All T := by
-  intro hST hTS a ha
-  rw [All_spec _ a ha, All_spec _ a ha]
-  sorry
+intro h
+have hST : S = T := by
+  · apply Set.ext
+    intro s
+    apply h s s equiv_refl
+subst hST
+rfl
+
 end CongreunceTheorems
 
 namespace AlgebraicTheorems
