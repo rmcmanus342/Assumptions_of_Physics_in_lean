@@ -180,3 +180,46 @@ contradiction
 
 
 end AlgebraicTheorems
+
+namespace test
+
+theorem apply_congr {ι}
+  (fam1 fam2 : ι → C.Statement)
+  (f : (ι → Bool) → Bool)
+  (h : ∀ i : ι, fam1 i ≡ fam2 i) :
+  (C.apply fam1 f) ≡ (C.apply fam2 f) := by
+intro a ha
+rw [C.apply_spec fam1 f a ha, C.apply_spec fam2 f a ha]
+have hcong : ∀ a ∈ C.possible, ∀ (i : ι),  a (fam1 i) = a (fam2 i) := by
+  · intro a ha i; exact h i a ha
+have hfun : a ∘ fam1 = a ∘ fam2 := by
+  · funext i
+    exact hcong a ha i
+exact congrArg f hfun
+
+theorem apply_congr' {ι}
+  (fam1 fam2 : ι → C.Statement)
+  (f : (ι → Bool) → Bool)
+  (hcong : ∀ i : ι, fam1 i ≡ fam2 i) :
+  (C.apply fam1 f) ≡ (C.apply fam2 f) := by
+  intro a ha
+  -- reduce both sides using apply_spec
+  rw [C.apply_spec fam1 f a ha, C.apply_spec fam2 f a ha]
+  -- unfold equivalence once
+  unfold equivalent at hcong
+  -- prove equality of composed functions via ext
+  have : a ∘ fam1 = a ∘ fam2 := by
+    ext i
+    simp only [Function.comp, hcong i a ha]
+  -- finish by congruence of f
+  simp only [this]
+
+@[simp]
+theorem apply_congr_simp {ι}
+  {fam1 fam2 : ι → C.Statement}
+  (f : (ι → Bool) → Bool) :
+  (h : ∀ i : ι, fam1 i ≡ fam2 i) →
+  (C.apply fam1 f) ≡ (C.apply fam2 f) :=
+  apply_congr fam1 fam2 f
+
+end test
